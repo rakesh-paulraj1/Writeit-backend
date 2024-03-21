@@ -71,19 +71,27 @@ app.post("/api/v1/user/signin", async (c) => {
 
 
 app.post('/api/v1/blog',(c)=>{
-  
+  return c.json({
+    msg:"hello"
+  })
 })
 app.put('/api/v1/blog',(c)=>{
 
-  
+  return c.json({
+    msg:"hello"
+  })
 })
 app.get('/api/v1/blog/:id',(c)=>{
-   
+  return c.json({
+    msg:"hello"
+  })
 
 })
 
 app.get('/api/v1/blog/bulk',(c)=>{
-  
+  return c.json({
+    msg:"hello"
+  })
 })
 
 
