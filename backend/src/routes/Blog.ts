@@ -56,7 +56,7 @@ blogrouter.post('/', async (c) => {
         }
     });
     return c.json({
-        id: blog.id
+        id: blog.id,msg:"Created the Blog"
     });
 })
 
