@@ -12,9 +12,6 @@ Variables:{
 }}>();
 
 
-
-
-
 blogrouter.use("/*", async (c,next)=>{
     try{
 const token = c.req.header('authorization')||"";

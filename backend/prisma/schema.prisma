@@ -8,22 +8,32 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
+model Image {
+  id            Int     @id @default(autoincrement())
+  url           String
+  userId        Int     // Foreign key field for user's profile picture
+  profilepicId  Int?    // Optional foreign key field for profile picture
+  user          User?   @relation(fields: [userId], references: [id])
+  profilePic    User?   @relation(fields: [profilepicId], references: [id])
+}
 model User {
-  id       Int   @id @default(autoincrement())
-  email    String   @unique
-  name     String?
-  password String
-  posts    Blog[]
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  name          String?
+  password      String
+  profilePic    Image?   @relation(fields: [profilepicId], references: [id])
+  posts         Blog[]
 }
 
-model Blog {  
-  id        Int    @id @default(autoincrement())
+model Blog {
+  id        Int      @id @default(autoincrement())
   title     String
   authorId  Int
   content   String
   published Boolean  @default(false)
-  author    User @relation(fields: [authorId], references: [id])
- 
+  images    Image[]  // Array of images associated with the blog post
+  author    User     @relation(fields: [authorId], references: [id])
 }
- 
+
+
+
