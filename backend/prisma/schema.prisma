@@ -5,35 +5,46 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = "postgresql://neondb_owner:ide8H0XLhjoz@ep-cool-sea-a5xg8ty3.us-east-2.aws.neon.tech/neodb?sslmode=require"
 }
 
-model Image {
-  id            Int     @id @default(autoincrement())
-  url           String
-  userId        Int     // Foreign key field for user's profile picture
-  profilepicId  Int?    // Optional foreign key field for profile picture
-  user          User?   @relation(fields: [userId], references: [id])
-  profilePic    User?   @relation(fields: [profilepicId], references: [id])
-}
+
 model User {
-  id            Int      @id @default(autoincrement())
-  email         String   @unique
+  id            Int           @id @default(autoincrement())
+  email         String        @unique
   name          String?
   password      String
-  profilePic    Image?   @relation(fields: [profilepicId], references: [id])
+  profile       UserProfile?  // Reference to user profile picture
   posts         Blog[]
 }
 
 model Blog {
-  id        Int      @id @default(autoincrement())
+  id        Int           @id @default(autoincrement())
   title     String
   authorId  Int
   content   String
-  published Boolean  @default(false)
-  images    Image[]  // Array of images associated with the blog post
-  author    User     @relation(fields: [authorId], references: [id])
+  published Boolean       @default(false)
+  images    BlogImage[]
+  author    User          @relation(fields: [authorId], references: [id])
 }
+
+model BlogImage {
+  id        Int     @id @default(autoincrement())
+  url       String
+  public_id String   // Added public_id field
+  blog      Blog    @relation(fields: [blogId], references: [id])
+  blogId    Int
+}
+
+model UserProfile {
+  id        Int           @id @default(autoincrement())
+  userId    Int           @unique
+  url       String
+  public_id String       // Added public_id field
+  user      User          @relation(fields: [userId], references: [id])
+}
+
+
 
 
 

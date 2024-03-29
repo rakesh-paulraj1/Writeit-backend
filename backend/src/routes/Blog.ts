@@ -1,6 +1,7 @@
 import { decode, sign, verify } from 'hono/jwt'
 import { PrismaClient } from '@prisma/client/edge'
 import { withAccelerate } from '@prisma/extension-accelerate'
+import cloudinary from "cloudinary";
 import { Hono } from "hono";
 import { updateBlogInput,createBlogInput } from '@rakeshpaulraj/medium-clone-types';
 export const blogrouter = new Hono<{Bindings: {
