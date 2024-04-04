@@ -12,9 +12,10 @@ datasource db {
 model User {
   id            Int           @id @default(autoincrement())
   email         String        @unique
-  name          String?
+  name          String
+  bio           String?
   password      String
-  profile       UserProfile?  // Reference to user profile picture
+  profile       UserProfile?  
   posts         Blog[]
 }
 

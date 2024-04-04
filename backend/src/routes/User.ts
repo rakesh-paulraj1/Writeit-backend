@@ -1,10 +1,13 @@
 import { decode, sign, verify } from 'hono/jwt'
 import { Hono } from "hono";
 import cloudinary from "cloudinary";
+import {getDataUri} from '../utils/dataUri'
 import { signininput,signupinput } from '@rakeshpaulraj/medium-clone-types';
 export const userrouter = new Hono<{Bindings: {
     DATABASE_URL: string
     JWT_SECRET: string
+},Variables:{
+  userId:string
 }}>();
 import { PrismaClient } from '@prisma/client/edge'
 import { withAccelerate } from '@prisma/extension-accelerate'
@@ -51,6 +54,7 @@ userrouter.post("/signin", async (c) => {
         }
         const user = await prisma.user.findFirst({
           where: {
+
             email: body.email,
             password:body.password
           },
@@ -69,4 +73,59 @@ userrouter.post("/signin", async (c) => {
           return c.text("Error on Signin")
         }
       })
+
+
+userrouter.use("/profile", async (c, next) => {
+  try {
+    const token = c.req.header('authorization') || "";
+    const user = await verify(token, c.env.JWT_SECRET);
+
+    if (user) {
+      c.set("userId",user.id);
+      await next();
+    }
+    else {
+      c.status(401);
+      c.json({ error: "Unauthorized" })
+    }
+  } catch (e) {
+    c.status(401);
+    c.json({ error: "Unauthorized or Inavlid User" })
+  }
+});
+
+userrouter.put("/profile",async (c)=>{
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env.DATABASE_URL,
+  }).$extends(withAccelerate());
+ const body= await c.req.json();
+ const image = await c.req.parseBody();
+
+ const fileuri =  getDataUri(image);
+ const myCloud = await cloudinary.v2.uploader.upload(fileuri.content  ?? "", {
+  folder: "posts",
+});
+
+ const UserProfile = {
+  public_id: myCloud.public_id,
+  url: myCloud.secure_url,
+};
+
+ 
+const profilepic= await prisma.user.update({
+  where:{
+    id:body.id
+  },
+  data:{
+   UserProfile:UserProfile,
+   bio:body.bio,
+
+
+  }
+
+})
+})
+
+
+      
       
