@@ -32,7 +32,7 @@ model Blog {
 model BlogImage {
   id        Int     @id @default(autoincrement())
   url       String
-  public_id String   // Added public_id field
+  public_id String   
   blog      Blog    @relation(fields: [blogId], references: [id])
   blogId    Int
 }
@@ -41,7 +41,7 @@ model UserProfile {
   id        Int           @id @default(autoincrement())
   userId    Int           @unique
   url       String
-  public_id String       // Added public_id field
+  public_id String      
   user      User          @relation(fields: [userId], references: [id])
 }
 

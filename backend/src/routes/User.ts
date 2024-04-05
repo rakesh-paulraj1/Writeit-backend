@@ -94,36 +94,46 @@ userrouter.use("/profile", async (c, next) => {
   }
 });
 
-userrouter.put("/profile",async (c)=>{
+userrouter.put("/profile", async (c) => {
+  try{
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate());
- const body= await c.req.json();
- const image = await c.req.parseBody();
+  const body = await c.req.json();
+  const image = await c.req.parseBody();
 
- const fileuri =  getDataUri(image);
- const myCloud = await cloudinary.v2.uploader.upload(fileuri.content  ?? "", {
-  folder: "posts",
-});
+  const fileuri = getDataUri(image);
+  const myCloud = await cloudinary.v2.uploader.upload(fileuri.content ?? "", {
+    folder: "posts",
+  });
 
- const UserProfile = {
-  public_id: myCloud.public_id,
-  url: myCloud.secure_url,
-};
+  const  userProfileData = {
+    public_id: myCloud.public_id,
+    url: myCloud.secure_url,
+  };
 
- 
-const profilepic= await prisma.user.update({
-  where:{
-    id:body.id
-  },
-  data:{
-   UserProfile:UserProfile,
-   bio:body.bio,
-
-
-  }
-
-})
+  const updatedUser = await prisma.user.update({
+    where: {
+      id: body.id
+    },
+    data: {
+      profile: {
+        update: {
+          public_id: userProfileData.public_id,
+          url: userProfileData.url,
+        }
+      },
+      bio: body.bio,
+    }
+  });
+  
+  c.status(200);
+  c.json({msg:"Profile Updated"});
+}catch(error){
+c.status(500);
+console.log(error);
+c.json("Interental Server Error");
+}
 })
 
 
