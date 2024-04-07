@@ -8,3 +8,7 @@ JWT_SECRET="Medium"
 CLOUDINARY_API_KEY="764835529287671"
 CLOUDINARY_API_SECRET="ZIFRIyvPreXhOIyqsRnqypnEi_I"
 CLOUDINARY_CLOUD_NAME="dodqzjb5y"
+
+[build]
+node_compat = true
+  

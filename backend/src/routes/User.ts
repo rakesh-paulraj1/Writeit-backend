@@ -1,7 +1,7 @@
 import { decode, sign, verify } from 'hono/jwt'
 import { Hono } from "hono";
 import cloudinary from "cloudinary";
-import {getDataUri} from '../utils/dataUri'
+
 import { signininput,signupinput } from '@rakeshpaulraj/medium-clone-types';
 export const userrouter = new Hono<{Bindings: {
     DATABASE_URL: string
@@ -100,17 +100,8 @@ userrouter.put("/profile", async (c) => {
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate());
   const body = await c.req.json();
-  const image = await c.req.parseBody();
+ 
 
-  const fileuri = getDataUri(image);
-  const myCloud = await cloudinary.v2.uploader.upload(fileuri.content ?? "", {
-    folder: "posts",
-  });
-
-  const  userProfileData = {
-    public_id: myCloud.public_id,
-    url: myCloud.secure_url,
-  };
 
   const updatedUser = await prisma.user.update({
     where: {
@@ -119,14 +110,15 @@ userrouter.put("/profile", async (c) => {
     data: {
       profile: {
         update: {
-          public_id: userProfileData.public_id,
-          url: userProfileData.url,
+          public_id: body.public_id,
+          url: body.url,
         }
       },
       bio: body.bio,
     }
   });
   
+
   c.status(200);
   c.json({msg:"Profile Updated"});
 }catch(error){
