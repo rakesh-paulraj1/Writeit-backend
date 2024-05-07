@@ -114,7 +114,7 @@ blogrouter.get('/bulk',async(c)=>{
   });
 
 
-blogrouter.get('/:id', async(c)=>{
+blogrouter.get("/:id", async(c)=>{
   const param=await c.req.param("id");
   const prisma = new PrismaClient({
       datasourceUrl: c.env.DATABASE_URL,
@@ -128,7 +128,8 @@ blogrouter.get('/:id', async(c)=>{
         content:true,
         author:{
             select:{
-                name:true
+                name:true,
+                id:true
             }
         }
       }

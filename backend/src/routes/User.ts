@@ -32,7 +32,11 @@ userrouter.post('/signup', async (c) => {
     }
       });
      const jwt = await sign({ id: user.id }, c.env.JWT_SECRET);
-     return c.json({ jwt });
+     const id=user.id;
+     return c.json({ body:{
+      jwt,id
+     } });
+
      return c.text("Welcome!!");
     } catch(e) {
      c.status(403);
@@ -67,31 +71,63 @@ userrouter.post("/signin", async (c) => {
         }
       
         const jwt = await sign({ id: user.id }, c.env.JWT_SECRET);
-        return c.json({ jwt });}
+        const id=user.id;
+        return c.json({id,jwt});
+      }
         catch(e){
           c.status(411);
           return c.text("Error on Signin")
         }
       })
 
-
 userrouter.use("/profile", async (c, next) => {
-  try {
-    const token = c.req.header('authorization') || "";
-    const user = await verify(token, c.env.JWT_SECRET);
+        try {
+          const token = c.req.header('authorization') || "";
+          const user = await verify(token, c.env.JWT_SECRET);
+      
+          if (user) {
+            await next();
+          } else {
+            c.status(401);
+           return c.json({ error: "Unauthorized" });
+          
+            
+          }
+        } catch (e) {
+          c.status(401);
+           return c.json({ error: "Unauthorized or Invalid User" });
+          
+        }
+      });
+      
 
-    if (user) {
-      c.set("userId",user.id);
-      await next();
-    }
-    else {
-      c.status(401);
-      c.json({ error: "Unauthorized" })
-    }
-  } catch (e) {
-    c.status(401);
-    c.json({ error: "Unauthorized or Inavlid User" })
+
+userrouter.get("/:id",async(c)=>{
+ try {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env.DATABASE_URL,
+  }).$extends(withAccelerate());
+ const userid = 1;
+ const user = await prisma.user.findUnique({
+  where: {
+    id: Number(userid)
+  },
+  include: {
+    posts: true,
   }
+});
+
+if (!user) {
+  c.status(404);
+  return c.json({ error: "User not found" });
+}
+
+return c.json({ user });
+} catch (e) {
+console.error(e);
+c.status(500);
+return c.json({ error: "Internal server error" });
+}
 });
 
 userrouter.put("/profile", async (c) => {
@@ -101,8 +137,6 @@ userrouter.put("/profile", async (c) => {
   }).$extends(withAccelerate());
   const body = await c.req.json();
  
-
-
   const updatedUser = await prisma.user.update({
     where: {
       id: body.id
@@ -120,7 +154,7 @@ userrouter.put("/profile", async (c) => {
   
 
   c.status(200);
-  c.json({msg:"Profile Updated"});
+  return c.json({msg:"Profile Updated"});
 }catch(error){
 c.status(500);
 console.log(error);

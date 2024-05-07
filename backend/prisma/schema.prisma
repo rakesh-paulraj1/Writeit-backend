@@ -5,13 +5,11 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://neondb_owner:ide8H0XLhjoz@ep-cool-sea-a5xg8ty3.us-east-2.aws.neon.tech/neodb?sslmode=require"
+  url      =env("DATABASE_URL")
 }
 
 
 model User {
-
-
   id            Int           @id @default(autoincrement())
   email         String        @unique
   name          String
