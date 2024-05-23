@@ -57,6 +57,23 @@ blogrouter.post('/', async (c) => {
         id: blog.id,msg:"Created the Blog"
     });
 })
+blogrouter.put('/deleteblog/:id',async(c)=>{
+    const param=await c.req.param("id");
+    const prisma = new PrismaClient({
+        datasourceUrl: c.env.DATABASE_URL,
+      }).$extends(withAccelerate());
+     try{ const blog = await prisma.blog.delete({
+        where:{
+            id:Number(param)
+        }
+      })}
+      catch(e){
+        c.status(404);
+        return c.json({error:"Blog not found"})
+      }
+    
+})
+
 
 blogrouter.put('/', async (c)=>{
 

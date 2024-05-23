@@ -33,8 +33,9 @@ userrouter.post('/signup', async (c) => {
       });
      const jwt = await sign({ id: user.id }, c.env.JWT_SECRET);
      const id=user.id;
+     const username=user.name;
      return c.json({ body:{
-      jwt,id
+      jwt,id,username
      } });
 
      return c.text("Welcome!!");
@@ -72,7 +73,9 @@ userrouter.post("/signin", async (c) => {
       
         const jwt = await sign({ id: user.id }, c.env.JWT_SECRET);
         const id=user.id;
-        return c.json({id,jwt});
+        const name=user.name;
+        
+        return c.json({id,jwt,name});
       }
         catch(e){
           c.status(411);
