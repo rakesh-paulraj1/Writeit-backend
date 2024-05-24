@@ -16,11 +16,19 @@ userrouter.post('/signup', async (c) => {
     const prisma = new PrismaClient({
      datasourceUrl: c.env?.DATABASE_URL	,}).$extends(withAccelerate());
      const body = await c.req.json();
-        const success=signupinput.safeParse(body); 
-        if(!success.success){
-            c.status(403);
-            return c.json({error:"Invalid Input"});
-        }
+        const result=signupinput.safeParse(body); 
+        
+        
+    if (!result.success) {
+      const errors = result.error.issues.map(issue => {
+          return {
+              path: issue.path[0],
+              message: issue.message
+          };
+      });
+      c.status(403);
+      return c.json({ errors });
+  }
     
     try {
     const user = await prisma.user.create({
@@ -38,7 +46,7 @@ userrouter.post('/signup', async (c) => {
       jwt,id,username
      } });
 
-     return c.text("Welcome!!");
+     
     } catch(e) {
      c.status(403);
      return c.json({ error: "error while signing up" });
@@ -55,7 +63,7 @@ userrouter.post("/signin", async (c) => {
         const success=signininput.safeParse(body);
         if(!success){ 
           c.status(403);
-            return c.json({error:"Invalid Input"});
+            return c.json({error:"error"});
         }
         const user = await prisma.user.findFirst({
           where: {
@@ -132,6 +140,29 @@ c.status(500);
 return c.json({ error: "Internal server error" });
 }
 });
+userrouter.delete("/deleteuser/:id", async (c) => {
+  try {
+    const prisma = new PrismaClient({
+      datasourceUrl: c.env.DATABASE_URL,
+    }).$extends(withAccelerate());
+    const userid = 1;
+    const user = await prisma.user.findUnique({
+      where: {
+        id: Number(userid)
+      },
+      include: {
+        posts: true,
+      }
+    });
+
+    if (!user) {
+      c.status(404);
+      return c.json({})}
+    }
+  catch{
+    c.status(404);
+    return c.json({ error: "User not found" });
+  }})
 
 userrouter.put("/profile", async (c) => {
   try{
@@ -145,12 +176,6 @@ userrouter.put("/profile", async (c) => {
       id: body.id
     },
     data: {
-      profile: {
-        update: {
-          public_id: body.public_id,
-          url: body.url,
-        }
-      },
       bio: body.bio,
     }
   });

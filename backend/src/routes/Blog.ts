@@ -57,7 +57,7 @@ blogrouter.post('/', async (c) => {
         id: blog.id,msg:"Created the Blog"
     });
 })
-blogrouter.put('/deleteblog/:id',async(c)=>{
+blogrouter.delete('/deleteblog/:id',async(c)=>{
     const param=await c.req.param("id");
     const prisma = new PrismaClient({
         datasourceUrl: c.env.DATABASE_URL,
