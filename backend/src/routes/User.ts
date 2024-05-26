@@ -20,17 +20,26 @@ userrouter.post('/signup', async (c) => {
         
         
     if (!result.success) {
-      const errors = result.error.issues.map(issue => {
+      const message = result.error.issues.map(issue => {
           return {
               path: issue.path[0],
               message: issue.message
           };
       });
       c.status(403);
-      return c.json({ errors });
+      return c.json({ message });
   }
     
     try {
+      const availableuser = await prisma.user.findUnique({
+          where: {
+            email: body.email
+          }
+        });
+        if (availableuser) {
+          c.status(403);
+          return c.json({ message: "User already exists" });
+        }
     const user = await prisma.user.create({
     data: {
     email: body.email,
@@ -59,12 +68,19 @@ userrouter.post("/signin", async (c) => {
         }).$extends(withAccelerate());
         
         const body = await c.req.json();
-      try{
-        const success=signininput.safeParse(body);
-        if(!success){ 
-          c.status(403);
-            return c.json({error:"error"});
+        const result=signininput.safeParse(body);
+        if (!result.success) {
+          const message = result.error.issues.map(issue => {
+              return {
+                  path: issue.path[0],
+                  message: issue.message
+              };
+          });c.status(403);
+          return c.json({ message });
         }
+      try{
+      
+       
         const user = await prisma.user.findFirst({
           where: {
 
@@ -76,7 +92,7 @@ userrouter.post("/signin", async (c) => {
         
         if (!user) {
           c.status(403);
-          return c.json({ error: "Incorrect or User not found" });
+          return c.json({ message: "Incorrect Password or User not found" });
         }
       
         const jwt = await sign({ id: user.id }, c.env.JWT_SECRET);
@@ -118,7 +134,7 @@ userrouter.get("/:id",async(c)=>{
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate());
- const userid = 1;
+ const userid = c.req.param("id");
  const user = await prisma.user.findUnique({
   where: {
     id: Number(userid)
@@ -145,8 +161,8 @@ userrouter.delete("/deleteuser/:id", async (c) => {
     const prisma = new PrismaClient({
       datasourceUrl: c.env.DATABASE_URL,
     }).$extends(withAccelerate());
-    const userid = 1;
-    const user = await prisma.user.findUnique({
+    const userid = c.req.param("id");
+    const user = await prisma.user.delete({
       where: {
         id: Number(userid)
       },
@@ -157,7 +173,8 @@ userrouter.delete("/deleteuser/:id", async (c) => {
 
     if (!user) {
       c.status(404);
-      return c.json({})}
+      return c.json({message:"User does not exist"})}
+      return c.json({message:"User Deleted"});
     }
   catch{
     c.status(404);

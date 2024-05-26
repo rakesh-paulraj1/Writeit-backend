@@ -35,11 +35,14 @@ else{
 
 blogrouter.post('/', async (c) => {
     const body = await c.req.json();
-    const success= createBlogInput.safeParse(body);
-    if(!success.success){
-        c.status(403);
-        return c.json({error:"Invalid Input"});
-    }
+    const result= createBlogInput.safeParse(body);
+    if (!result.success) {
+        const message = result.error.issues.map(issue => {
+            return {
+                path: issue.path[0],
+                message: issue.message
+            };
+        })};
     
     const authorid=c.get("userId");
     const prisma = new PrismaClient({
