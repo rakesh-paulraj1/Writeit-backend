@@ -162,12 +162,15 @@ userrouter.delete("/deleteuser/:id", async (c) => {
       datasourceUrl: c.env.DATABASE_URL,
     }).$extends(withAccelerate());
     const userid = c.req.param("id");
+    console.log(userid);
+    await prisma.blog.deleteMany({
+      where: {
+        authorId: Number(userid)
+      }
+    });
     const user = await prisma.user.delete({
       where: {
         id: Number(userid)
-      },
-      include: {
-        posts: true,
       }
     });
 
@@ -176,9 +179,11 @@ userrouter.delete("/deleteuser/:id", async (c) => {
       return c.json({message:"User does not exist"})}
       return c.json({message:"User Deleted"});
     }
-  catch{
+  catch(e){
     c.status(404);
-    return c.json({ error: "User not found" });
+    return c.json({ 
+      "error":"User does not exist"
+     });
   }})
 
 userrouter.put("/profile", async (c) => {
