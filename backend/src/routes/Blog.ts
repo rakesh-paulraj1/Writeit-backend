@@ -69,7 +69,12 @@ blogrouter.delete('/deleteblog/:id',async(c)=>{
         where:{
             id:Number(param)
         }
-      })}
+      })
+      return c.json({
+       message: "Blog deleted Please refresh"
+    });}
+
+      
       catch(e){
         c.status(404);
         return c.json({error:"Blog not found"})
@@ -78,8 +83,8 @@ blogrouter.delete('/deleteblog/:id',async(c)=>{
 })
 
 
-blogrouter.put('/', async (c)=>{
-
+blogrouter.put('/:id', async (c)=>{
+    const param=await c.req.param("id");
     const body= await c.req.json ();
     const success=updateBlogInput.safeParse(body);
     if(!success){
@@ -91,15 +96,11 @@ blogrouter.put('/', async (c)=>{
       }).$extends(withAccelerate());
 
      const blog = await prisma.blog.update({
-        where:{
-            id: body.id
-        } ,
-        data:{
-            title:body.title,
-            content:body.content,
-           
-        }
-      })
+        where: { id:Number(param) },
+        data: {
+          title: body.title,    
+          content: body.content
+      }});
 
  return c.json({msg:"Upadted the Blog"});
 });

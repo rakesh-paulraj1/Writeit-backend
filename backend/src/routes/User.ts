@@ -103,7 +103,7 @@ userrouter.post("/signin", async (c) => {
       }
         catch(e){
           c.status(411);
-          return c.text("Error on Signin")
+          return c.text("Error on Signin"+e)
         }
       })
 
